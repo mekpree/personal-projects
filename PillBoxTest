@@ -1,0 +1,72 @@
+#include <Stepper.h>
+#include <LiquidCrystal_I2C.h>
+#include <RtcDS1302.h>
+#include <ThreeWire.h>
+const int stepsPerRevolution = 400;  // change this to fit the number of steps per revolution
+// for your motor
+
+const int butt = 3;
+const int butt2 = 5;
+bool pressed = true;
+const int led = 2;
+
+Stepper myStepper(stepsPerRevolution, 12,11,10,9);
+LiquidCrystal_I2C lcd(0x27, 16, 2); // Format -> (Address,Width,Height )
+ThreeWire myWire(7,6,8);
+
+void setup() {
+  // put your setup code here, to run once:
+  lcd.init();
+  lcd.backlight();
+  lcd.clear();
+  pinMode(butt, INPUT_PULLUP);
+  pinMode(butt2, INPUT_PULLUP);
+  pinMode(led, OUTPUT);
+  myStepper.setSpeed(30);
+
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  bool currentState = digitalRead(butt);
+  bool currentState2 = digitalRead(butt2);
+  digitalWrite(led, HIGH);
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Fri");
+  lcd.print(" ");
+  lcd.print("00");
+  lcd.print("/");
+  lcd.print("00");
+  lcd.print("/");
+  lcd.print("00");
+
+  lcd.setCursor(0, 1);
+  lcd.print("Time: ");
+  lcd.print("00");
+  lcd.print(":");
+  lcd.print("00");
+  lcd.print(":");
+  lcd.print("00");
+    delay(500);
+
+  if(currentState == pressed){
+    digitalWrite(led, LOW);
+    myStepper.step(2100);
+    while(digitalRead(butt) == pressed){
+
+    }
+  }
+
+  else if(currentState2 == pressed){
+    digitalWrite(led, LOW);
+    myStepper.step(-2100);  
+    while(digitalRead(butt) == pressed){
+
+    }
+  }
+  
+}
+
+
+
