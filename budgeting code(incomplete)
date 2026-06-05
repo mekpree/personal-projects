@@ -1,0 +1,77 @@
+from googlesearch import search
+import requests
+from bs4 import BeautifulSoup
+import re
+
+def get_tax_rate(city, state):
+
+    query = city + " " + state + " local income tax rate"
+
+    try:
+        urls = list(search(query, num_results=5))
+
+        for url in urls:
+
+            print("Checking:", url)
+
+            response = requests.get(
+                url,
+                headers={"User-Agent":"Mozilla/5.0"},
+                timeout=10
+            )
+
+            soup = BeautifulSoup(response.text, "html.parser")
+
+            for tag in soup(["script", "style"]):
+                tag.decompose()
+
+            text = soup.get_text(" ", strip=True)
+
+            percentages = re.findall(r"\d+\.\d+%", text)
+
+            if percentages:
+                print("Found:", percentages[0])
+                return float(percentages[0].replace("%", "")) / 100
+
+    except Exception as e:
+        print("Error:", e)
+
+    return 0
+
+def calculate_budget():
+
+    city = input("City: ")
+    state = input("State: ")
+
+    wage = float(input("Hourly Wage: "))
+    hours = float(input("Hours Worked Per Week: "))
+
+    rent = float(input("Rent: $"))
+
+    gross = wage * hours * 4
+
+    federal_tax = gross * 0.12
+    social_security = gross * 0.062
+    medicare = gross * 0.0145
+
+    local_tax_rate = get_tax_rate(city, state)
+    local_tax = gross * local_tax_rate
+
+    total_tax = (
+        federal_tax +
+        social_security +
+        medicare +
+        local_tax
+    )
+
+    take_home = gross - total_tax
+
+    money_left = take_home - rent
+
+    print("\n------ RESULTS ------")
+    print("Gross Income: $", round(gross, 2))
+    print("Local Tax Rate:", round(local_tax_rate * 100, 2), "%")
+    print("Take Home Pay: $", round(take_home, 2))
+    print("Money After Rent: $", round(money_left, 2))
+
+calculate_budget()
